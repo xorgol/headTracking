@@ -1,10 +1,14 @@
 <html>
   <head>
+
+    <!-- Import libraries -->
     <script
       async
       src="https://unpkg.com/es-module-shims@1.7.2/dist/es-module-shims.js"
     ></script>
+
     <script src=" https://cdn.jsdelivr.net/npm/osc-js@2.4.0/lib/osc.min.js "></script>
+    
     <script type="importmap">
       {
         "imports": {
@@ -14,49 +18,84 @@
         }
       }
     </script>
-    <script type="module">
+
+    <!-- Source core -->
+    <script type = "module" >
+
       import * as THREE from "three";
       import { MindARThree } from "mindar-face-three";
+
+      // Init OSC sender
       var osc = new OSC();
-      // osc.open({ port: document.querySelector("#port").value });
+      // osc.open({ port: document.querySelector("#oscDestinationPortText").value });  // Default = 8080 (uncommet this line to use custom port)
       osc.open();
-      const mindarThree = new MindARThree({
-        container: document.querySelector("#container"),
-      });
+
+      // Init Mind AR
+      const mindarThree = new MindARThree( {
+        container: document.querySelector( "#container" ),
+      } );
+
+      // Get Mind AR objects
       const { renderer, scene, camera } = mindarThree;
+
+      // Create anchor point on face mesh: nose
+      // https://github.com/tensorflow/tfjs-models/blob/master/face-landmarks-detection/mesh_map.jpg
       const anchor = mindarThree.addAnchor(1);
+
+      // Create sphere to be added on face achor point
       const geometry = new THREE.SphereGeometry(0.1, 32, 16);
-      const material = new THREE.MeshBasicMaterial({
+      const material = new THREE.MeshBasicMaterial( 
+        {
         color: 0x00ffff,
         transparent: true,
         opacity: 0.5,
-      });
+      } );
       const sphere = new THREE.Mesh(geometry, material);
+      
+      // Lock sphere on face ancor point nose
       anchor.group.add(sphere);
-      const rotationQuaternion = new THREE.Quaternion();
+
+      // Add axes ref system on the sphere
       const positionVector = new THREE.Vector3();
       const axesHelper = new THREE.AxesHelper(1);
       sphere.add(axesHelper);
-      const start = async () => {
+
+      // Get quaternion
+      const rotationQuaternion = new THREE.Quaternion();
+
+      // "start" function: live processing
+      const start = async () => 
+      {
         await mindarThree.start();
-        renderer.setAnimationLoop(() => {
-          renderer.render(scene, camera);
-          positionVector.setFromMatrixPosition(sphere.modelViewMatrix);
-          rotationQuaternion.setFromRotationMatrix(sphere.modelViewMatrix);
-          if (!document.querySelector("#position").checked) {
+        renderer.setAnimationLoop( () => 
+        {
+          renderer.render( scene, camera );
+          positionVector.setFromMatrixPosition( sphere.modelViewMatrix );
+          rotationQuaternion.setFromRotationMatrix( sphere.modelViewMatrix );
+
+          // "Print Position" check box 
+          if ( !document.querySelector( "#printPosCheckBox" ).checked ) 
+          { // is NOT checked
+
+            // Hide position labels
             document
-              .querySelector("#posLabels")
-              .setAttribute("style", "display:none");
-          } else {
+              .querySelector( "#posLabels" )
+              .setAttribute( "style", "display:none" );
+          } 
+          else // is checked
+          {
+            // Show/update position labels
             document
-              .querySelector("#posLabels")
-              .setAttribute("style", "display:block");
-            document.querySelector("#posX").innerHTML =
+              .querySelector( "#posLabels" )
+              .setAttribute( "style", "display:block" );
+            document.querySelector( "#posX" ).innerHTML =
               "X: " + positionVector["x"].toString();
-            document.querySelector("#posY").innerHTML =
+            document.querySelector( "#posY" ).innerHTML =
               "Y: " + positionVector["y"].toString();
-            document.querySelector("#posZ").innerHTML =
+            document.querySelector( "#posZ" ).innerHTML =
               "Z: " + positionVector["z"].toString();
+              
+              // Build and send position OSC message
               const message = new OSC.Message(
               "/translation",
               positionVector["x"],
@@ -65,46 +104,61 @@
             );
             osc.send(message);
           }
-          if (!document.querySelector("#rotation").checked) {
+
+          // "Print Rotation" check box 
+          if ( !document.querySelector( "#printRotationCheckBox" ).checked ) 
+          {
             document
-              .querySelector("#rotLabels")
-              .setAttribute("style", "display:none");
-          } else {
+              .querySelector( "#rotLabels" )
+              .setAttribute( "style", "display:none" );
+          } else 
+          {
+            // Build and send translation OSC message
             document
-              .querySelector("#rotLabels")
-              .setAttribute("style", "display:block");
-            document.querySelector("#rotW").innerHTML =
+              .querySelector( "#rotLabels" )
+              .setAttribute( "style", "display:block" );
+            document.querySelector( "#rotW" ).innerHTML =
               "W: " + rotationQuaternion["_w"].toString();
-            document.querySelector("#rotX").innerHTML =
+            document.querySelector( "#rotX" ).innerHTML =
               "X: " + rotationQuaternion["_x"].toString();
-            document.querySelector("#rotY").innerHTML =
+            document.querySelector( "#rotY" ).innerHTML =
               "Y: " + rotationQuaternion["_y"].toString();
-            document.querySelector("#rotZ").innerHTML =
+            document.querySelector( "#rotZ" ).innerHTML =
               "Z: " + rotationQuaternion["_z"].toString();
-            const message = new OSC.Message(
+
+              // Build and send translation OSC message
+              const message = new OSC.Message(
               "SceneRotator/quaternions",
               rotationQuaternion["_w"],
               rotationQuaternion["_x"],
               rotationQuaternion["_y"],
               rotationQuaternion["_z"]
             );
-            osc.send(message);
+            osc.send( message );
           }
           // console.log(rotationQuaternion.setFromRotationMatrix(sphere.modelViewMatrix));
           // console.log(positionVector.setFromMatrixPosition(sphere.modelViewMatrix));
         });
       };
-      const startButton = document.querySelector("#startButton");
-      startButton.addEventListener("click", () => {
+
+      // Assign functions to Start button
+      const startButton = document.querySelector( "#startButton" );
+      startButton.addEventListener( "click", () => {
         start();
-      });
-      stopButton.addEventListener("click", () => {
+      } );
+
+      // Assign function to Stop button
+      stopButton.addEventListener( "click", () => {
         mindarThree.stop();
-        mindarThree.renderer.setAnimationLoop(null);
-      });
+        mindarThree.renderer.setAnimationLoop( null );
+      } );
+
     </script>
+
     <!-- <script type="module" src="/index.js"></script> -->
     <!-- <script type="module" src="/oscBridge.js"></script> -->
+
+    <!-- HTML page -->
     <style>
       body {
         margin: 0;
@@ -127,25 +181,39 @@
   </head>
   <body>
     <div id="control">
+
+      <!-- START and STOP buttons -->
       <button id="startButton">Start</button>
       <button id="stopButton">Stop</button>
       <br />
-      <input type="checkbox" id="position" />
-      <label for="position">Print Position</label>
-      <input type="checkbox" id="rotation" />
-      <label for="rotation">Print Rotation</label>
+      
+      <!-- Print position check box -->
+      <input type="checkbox" id="printPosCheckBox" />
+      <label for="printPosCheckBox">Print Position</label>
+
+      <!-- Print rotation check box -->
+      <input type="checkbox" id="printRotationCheckBox" />
+      <label for="printRotationCheckBox">Print Rotation</label>
       <br />
-      <input type="text" id="ip" size="15" value="127.0.0.1" />
-      <label for="ip">Destination IP</label>
+      
+      <!-- OSC destination IP -->
+      <input type="text" id="oscDestinationIpText" size="15" value="127.0.0.1" />
+      <label for="oscDestinationIpText">Destination IP</label>
       <br />
-      <input type="text" id="port" size="4" value="9001" />
-      <label for="port">Port</label>
+
+      <!-- OSC destination port -->
+      <input type="text" id="oscDestinationPortText" size="4" value="9001" />
+      <label for="oscDestinationPortText">Port</label>
+
+      <!-- Position labels -->
       <div id="posLabels">
         <p id="posX">X:</p>
         <p id="posY">Y:</p>
         <p id="posZ">Z:</p>
       </div>
       <br />
+
+      <!-- Rotation labels -->
       <div id="rotLabels">
         <p id="rotW">W:</p>
         <p id="rotX">X:</p>
