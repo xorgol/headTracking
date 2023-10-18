@@ -2,15 +2,15 @@
   <head>
     <script
       async
-      src="https://unpkg.com/es-module-shims@1.7.2/dist/es-module-shims.js"
+      src="es-module-shims.js"
     ></script>
-    <script src=" https://cdn.jsdelivr.net/npm/osc-js@2.4.0/lib/osc.min.js "></script>
+    <script src="osc.min.js"></script>
     <script type="importmap">
       {
         "imports": {
-          "three": "https://unpkg.com/three@0.157.0/build/three.module.js",
-          "three/addons/": "https://unpkg.com/three@0.157.0/examples/jsm/",
-          "mindar-face-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-face-three.prod.js"
+          "three": "./three.module.js",
+          "three/addons/": "./three/examples/jsm/",
+          "mindar-face-three": "./mindar-face-three.prod.js"
         }
       }
     </script>

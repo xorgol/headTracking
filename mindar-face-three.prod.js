@@ -121,7 +121,7 @@ class C {
     const d = s.videoWidth / s.videoHeight, h = r.clientWidth / r.clientHeight;
     d > h ? (a = r.clientHeight, i = a * d) : (i = r.clientWidth, a = i / d), s.style.top = -(a - r.clientHeight) / 2 + "px", s.style.left = -(i - r.clientWidth) / 2 + "px", s.style.width = i + "px", s.style.height = a + "px";
     const c = n.domElement, e = t.domElement;
-    c.style.position = "absolute", c.style.top = s.style.top, c.style.left = s.style.left, c.style.width = s.style.width, c.style.height = s.style.height, e.style.position = "absolute", e.style.top = s.style.top, e.style.left = s.style.left, e.style.transformOrigin = "top left", e.style.transform = "scale(" + i / parseFloat(e.style.width) + "," + a / parseFloat(e.style.height) + ")";fac
+    c.style.position = "absolute", c.style.top = s.style.top, c.style.left = s.style.left, c.style.width = s.style.width, c.style.height = s.style.height, e.style.position = "absolute", e.style.top = s.style.top, e.style.left = s.style.left, e.style.transformOrigin = "top left", e.style.transform = "scale(" + i / parseFloat(e.style.width) + "," + a / parseFloat(e.style.height) + ")";
   }
 }
 window.MINDAR || (window.MINDAR = {});
