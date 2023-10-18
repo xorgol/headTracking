@@ -55,6 +55,17 @@
       // Lock sphere on face ancor point nose
       anchor.group.add(sphere);
 
+      // ------------------------------------------------------------
+      // MindAR reference system vs. ISO2631 reference system
+      // ------------------------------------------------------------
+      //  Axis origin     | Camera            | Listener head center
+      // ------------------------------------------------------------
+      //  Axis directions | X: left           | X: listener front
+      //                  | Y: up             | Y: left
+      //                  | Z: back =         | Z: up
+      //                  |    listener front |
+      // ------------------------------------------------------------
+
       // Add axes ref system on the sphere
       const positionVector = new THREE.Vector3();
       const axesHelper = new THREE.AxesHelper(1);
@@ -89,11 +100,11 @@
               .querySelector( "#posLabels" )
               .setAttribute( "style", "display:block" );
             document.querySelector( "#posX" ).innerHTML =
-              "X: " + positionVector["x"].toString();
+              "X: " + positionVector["x"].toPrecision(2);
             document.querySelector( "#posY" ).innerHTML =
-              "Y: " + positionVector["y"].toString();
+              "Y: " + positionVector["y"].toPrecision(2);
             document.querySelector( "#posZ" ).innerHTML =
-              "Z: " + positionVector["z"].toString();
+              "Z: " + positionVector["z"].toPrecision(2);
           }
 
           // "Send Position" check box 
@@ -122,13 +133,13 @@
               .querySelector( "#rotLabels" )
               .setAttribute( "style", "display:block" );
             document.querySelector( "#rotW" ).innerHTML =
-              "W: " + rotationQuaternion["_w"].toString();
+              "W: " + rotationQuaternion["_w"].toPrecision(2);
             document.querySelector( "#rotX" ).innerHTML =
-              "X: " + rotationQuaternion["_x"].toString();
+              "X: " + rotationQuaternion["_x"].toPrecision(2);
             document.querySelector( "#rotY" ).innerHTML =
-              "Y: " + rotationQuaternion["_y"].toString();
+              "Y: " + rotationQuaternion["_y"].toPrecision(2);
             document.querySelector( "#rotZ" ).innerHTML =
-              "Z: " + rotationQuaternion["_z"].toString();
+              "Z: " + rotationQuaternion["_z"].toPrecision(2);
 
           }
 
