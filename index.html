@@ -94,13 +94,17 @@
               "Y: " + positionVector["y"].toString();
             document.querySelector( "#posZ" ).innerHTML =
               "Z: " + positionVector["z"].toString();
-              
-              // Build and send position OSC message
-              const message = new OSC.Message(
-              "/translation",
-              positionVector["x"],
-              positionVector["y"],
-              positionVector["z"]
+          }
+
+          // "Send Position" check box 
+          if ( document.querySelector( "#sendPositionCheckBox" ).checked )
+          {
+            // Build and send position OSC message
+            const message = new OSC.Message(
+            "/translation",
+            positionVector["x"],
+            positionVector["y"],
+            positionVector["z"]
             );
             osc.send(message);
           }
@@ -126,7 +130,12 @@
             document.querySelector( "#rotZ" ).innerHTML =
               "Z: " + rotationQuaternion["_z"].toString();
 
-              // Build and send translation OSC message
+          }
+
+          // "Send Rotation" check box 
+          if ( document.querySelector( "#sendRotationCheckBox" ).checked )
+          {
+              // Build and send quaternion OSC message
               const message = new OSC.Message(
               "SceneRotator/quaternions",
               rotationQuaternion["_w"],
@@ -136,6 +145,7 @@
             );
             osc.send( message );
           }
+
           // console.log(rotationQuaternion.setFromRotationMatrix(sphere.modelViewMatrix));
           // console.log(positionVector.setFromMatrixPosition(sphere.modelViewMatrix));
         });
@@ -185,7 +195,7 @@
       <!-- START and STOP buttons -->
       <button id="startButton">Start</button>
       <button id="stopButton">Stop</button>
-      <br />
+      <br /><br />
       
       <!-- Print position check box -->
       <input type="checkbox" id="printPosCheckBox" />
@@ -194,8 +204,8 @@
       <!-- Print rotation check box -->
       <input type="checkbox" id="printRotationCheckBox" />
       <label for="printRotationCheckBox">Print Rotation</label>
-      <br />
-      
+      <br /> <br />
+
       <!-- OSC destination IP -->
       <input type="text" id="oscDestinationIpText" size="15" value="127.0.0.1" />
       <label for="oscDestinationIpText">Destination IP</label>
@@ -204,6 +214,16 @@
       <!-- OSC destination port -->
       <input type="text" id="oscDestinationPortText" size="4" value="9001" />
       <label for="oscDestinationPortText">Port</label>
+      <br />
+
+      <!-- Send position check box -->
+      <input type="checkbox" id="sendPositionCheckBox" />
+      <label for="sendPositionCheckBox">Send Position</label>
+
+      <!-- Send rotation check box -->
+      <input type="checkbox" id="sendRotationCheckBox" />
+      <label for="sendRotationCheckBox">Send Rotation</label>
+      <br /> <br />
 
       <!-- Position labels -->
       <div id="posLabels">
