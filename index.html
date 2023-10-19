@@ -75,6 +75,7 @@
 
       // Get quaternion
       const rotationQuaternion = new THREE.Quaternion();
+      let quaternionMagnitude = 1.0;
 
       // "start" function: live processing
       const start = async () => 
@@ -85,6 +86,14 @@
           renderer.render( scene, camera );
           positionVector.setFromMatrixPosition( sphere.modelViewMatrix );
           rotationQuaternion.setFromRotationMatrix( sphere.modelViewMatrix );
+
+          // Normalize quaternion
+          quaternionMagnitude = Math.sqrt( rotationQuaternion._w ** 2 + rotationQuaternion._x ** 2 + rotationQuaternion._y ** 2 + rotationQuaternion._z ** 2 );
+          rotationQuaternion._w = rotationQuaternion._w / quaternionMagnitude;
+          rotationQuaternion._x = rotationQuaternion._x / quaternionMagnitude;
+          rotationQuaternion._y = rotationQuaternion._y / quaternionMagnitude;
+          rotationQuaternion._z = rotationQuaternion._z / quaternionMagnitude;
+
 
           // "Print Position" check box 
           if ( !document.querySelector( "#printPosCheckBox" ).checked ) 
@@ -101,12 +110,12 @@
             document
               .querySelector( "#posLabels" )
               .setAttribute( "style", "display:block" );
-            document.querySelector( "#posX" ).innerHTML =
-              "X: " + positionVector["x"].toPrecision(2);
+            document.querySelector( "#posX" ).innerHTML = // MindAR     ISO2631
+              "X: " + positionVector["z"].toPrecision(2); // Z          X
             document.querySelector( "#posY" ).innerHTML =
-              "Y: " + positionVector["y"].toPrecision(2);
+              "Y: " + positionVector["x"].toPrecision(2); // X          Y
             document.querySelector( "#posZ" ).innerHTML =
-              "Z: " + positionVector["z"].toPrecision(2);
+              "Z: " + positionVector["y"].toPrecision(2); // Y          Z
           }
 
           // "Send Position" check box 
@@ -115,13 +124,33 @@
             // Build and send position OSC message
             const message = new OSC.Message(
               document.getElementById('oscPositionAddressText').value,
-            //"/translation",      // ISO2631
-            positionVector["z"], // X
-            positionVector["x"], // Y
-            positionVector["y"]  // Z
+                                  // MindAR     ISO2631
+            positionVector["z"],  // Z          X
+            positionVector["x"],  // X          Y
+            positionVector["y"]   // Y          Z
             );
             osc.send(message);
           }
+
+          // "Print Euler Angles" check box 
+          //if ( !document.querySelector( "#printEulerCheckBox" ).checked ) 
+          //{
+          //  document
+          //    .querySelector( "#eulerRotationLabels" )
+          //    .setAttribute( "style", "display:none" );
+          //} else 
+          //{
+            // Build and send translation OSC message
+            //document
+            //  .querySelector( "#eulerRotationLabels" )
+            //  .setAttribute( "style", "display:block" );
+            //document.querySelector( "#rotYaw" ).innerHTML =
+            //  "Yaw: " + eulerAngles["_w"].toPrecision(2);  // W     ISO2631
+            //document.querySelector( "#rotPitch" ).innerHTML =       
+            //  "Pitch: " + eulerAngles["_x"].toPrecision(2);  // Z    X
+            //document.querySelector( "#rotRoll" ).innerHTML =
+            //  "Roll: " + eulerAngles["_y"].toPrecision(2);  // X    Y
+          //}
 
           // "Print Rotation" check box 
           if ( !document.querySelector( "#printRotationCheckBox" ).checked ) 
@@ -136,13 +165,13 @@
               .querySelector( "#rotLabels" )
               .setAttribute( "style", "display:block" );
             document.querySelector( "#rotW" ).innerHTML =
-              "W: " + rotationQuaternion["_w"].toPrecision(2);  // ISO2631
+              "W: " + rotationQuaternion["_w"].toPrecision(2);  // MindAR   ISO2631
             document.querySelector( "#rotX" ).innerHTML =       
-              "X: " + rotationQuaternion["_z"].toPrecision(2);  // X
+              "X: " + rotationQuaternion["_z"].toPrecision(2);  // Z        X
             document.querySelector( "#rotY" ).innerHTML =
-              "Y: " + rotationQuaternion["_x"].toPrecision(2);  // Y
+              "Y: " + rotationQuaternion["_x"].toPrecision(2);  // X        Y
             document.querySelector( "#rotZ" ).innerHTML =
-              "Z: " + rotationQuaternion["_y"].toPrecision(2);  // Z
+              "Z: " + rotationQuaternion["_y"].toPrecision(2);  // Y        Z
 
           }
 
@@ -152,10 +181,10 @@
               // Build and send quaternion OSC message
               const message = new OSC.Message(
                 document.getElementById('oscRotationAddressText').value,
-                rotationQuaternion["_w"],
-                rotationQuaternion["_x"],
-                rotationQuaternion["_y"],
-                rotationQuaternion["_z"]
+                rotationQuaternion["_w"], // MindAR     ISO2631
+                rotationQuaternion["_z"], // Z          X
+                rotationQuaternion["_x"], // X          Y
+                rotationQuaternion["_y"]  // Y          Z
                 );
             osc.send( message );
           }
@@ -215,6 +244,11 @@
       <input type="checkbox" id="printPosCheckBox" />
       <label for="printPosCheckBox">Print Position</label>
 
+      <!-- Print Euler's Angles check box -->
+      <!--input type="checkbox" id="printEulerCheckBox" /-->
+      <!--label for="printEulerCheckBox">Print Rotation</label-->
+      <br /> <br / >
+
       <!-- Print rotation check box -->
       <input type="checkbox" id="printRotationCheckBox" />
       <label for="printRotationCheckBox">Print Rotation</label>
@@ -256,6 +290,13 @@
         <p id="posZ">Z:</p>
       </div>
       <br />
+
+      <!-- Rotation labels -->
+      <div id="eulerRotationLabels">
+        <p id="rotYaw">Yaw:</p>
+        <p id="rotPitch">Pitch:</p>
+        <p id="rotRoll">Roll:</p>
+      </div>
 
       <!-- Rotation labels -->
       <div id="rotLabels">
