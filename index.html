@@ -58,6 +58,8 @@
       // ------------------------------------------------------------
       // MindAR reference system vs. ISO2631 reference system
       // ------------------------------------------------------------
+      //                  | MindAR            | ISO2631
+      // ------------------------------------------------------------
       //  Axis origin     | Camera            | Listener head center
       // ------------------------------------------------------------
       //  Axis directions | X: left           | X: listener front
@@ -112,10 +114,11 @@
           {
             // Build and send position OSC message
             const message = new OSC.Message(
-            "/translation",
-            positionVector["x"],
-            positionVector["y"],
-            positionVector["z"]
+              document.getElementById('oscPositionAddressText').value,
+            //"/translation",      // ISO2631
+            positionVector["z"], // X
+            positionVector["x"], // Y
+            positionVector["y"]  // Z
             );
             osc.send(message);
           }
@@ -133,13 +136,13 @@
               .querySelector( "#rotLabels" )
               .setAttribute( "style", "display:block" );
             document.querySelector( "#rotW" ).innerHTML =
-              "W: " + rotationQuaternion["_w"].toPrecision(2);
-            document.querySelector( "#rotX" ).innerHTML =
-              "X: " + rotationQuaternion["_x"].toPrecision(2);
+              "W: " + rotationQuaternion["_w"].toPrecision(2);  // ISO2631
+            document.querySelector( "#rotX" ).innerHTML =       
+              "X: " + rotationQuaternion["_z"].toPrecision(2);  // X
             document.querySelector( "#rotY" ).innerHTML =
-              "Y: " + rotationQuaternion["_y"].toPrecision(2);
+              "Y: " + rotationQuaternion["_x"].toPrecision(2);  // Y
             document.querySelector( "#rotZ" ).innerHTML =
-              "Z: " + rotationQuaternion["_z"].toPrecision(2);
+              "Z: " + rotationQuaternion["_y"].toPrecision(2);  // Z
 
           }
 
@@ -148,12 +151,12 @@
           {
               // Build and send quaternion OSC message
               const message = new OSC.Message(
-              "SceneRotator/quaternions",
-              rotationQuaternion["_w"],
-              rotationQuaternion["_x"],
-              rotationQuaternion["_y"],
-              rotationQuaternion["_z"]
-            );
+                document.getElementById('oscRotationAddressText').value,
+                rotationQuaternion["_w"],
+                rotationQuaternion["_x"],
+                rotationQuaternion["_y"],
+                rotationQuaternion["_z"]
+                );
             osc.send( message );
           }
 
@@ -217,14 +220,24 @@
       <label for="printRotationCheckBox">Print Rotation</label>
       <br /> <br />
 
-      <!-- OSC destination IP -->
+      <!-- destination IP adress -->
       <input type="text" id="oscDestinationIpText" size="15" value="127.0.0.1" />
       <label for="oscDestinationIpText">Destination IP</label>
       <br />
 
-      <!-- OSC destination port -->
+      <!-- destination port -->
       <input type="text" id="oscDestinationPortText" size="4" value="9001" />
       <label for="oscDestinationPortText">Port</label>
+      <br /> <br />
+
+      <!-- translation OSC address -->
+      <input type="text" id="oscPositionAddressText" size="20" value="/position" />
+      <label for="oscPositionAddressText">Position OSC address</label>
+      <br />
+
+      <!-- rotation OSC address -->
+      <input type="text" id="oscRotationAddressText" size="20" value="/rotation" />
+      <label for="oscRotationAddressText">Rotation OSC address</label>
       <br />
 
       <!-- Send position check box -->
