@@ -84,7 +84,16 @@
         renderer.setAnimationLoop( () => 
         {
           renderer.render( scene, camera );
+
+          // Get sphere position
           positionVector.setFromMatrixPosition( sphere.modelViewMatrix );
+
+          // Unit conversion: from centimeters to meters
+          positionVector.x = positionVector.x / 100.0;
+          positionVector.y = positionVector.y / 100.0;
+          positionVector.z = positionVector.z / 100.0;
+
+          // Get sphere rotation quaternion
           rotationQuaternion.setFromRotationMatrix( sphere.modelViewMatrix );
 
           // Normalize quaternion
@@ -94,28 +103,27 @@
           rotationQuaternion._y = rotationQuaternion._y / quaternionMagnitude;
           rotationQuaternion._z = rotationQuaternion._z / quaternionMagnitude;
 
-
           // "Print Position" check box 
           if ( !document.querySelector( "#printPosCheckBox" ).checked ) 
-          { // is NOT checked
+          { // if it's NOT checked
 
             // Hide position labels
             document
               .querySelector( "#posLabels" )
               .setAttribute( "style", "display:none" );
           } 
-          else // is checked
+          else // if it's checked
           {
             // Show/update position labels
             document
               .querySelector( "#posLabels" )
               .setAttribute( "style", "display:block" );
             document.querySelector( "#posX" ).innerHTML = // MindAR     ISO2631
-              "X: " + positionVector["z"].toPrecision(2); // Z          X
+              "X [m]: " + positionVector["z"].toPrecision(2); // Z          X
             document.querySelector( "#posY" ).innerHTML =
-              "Y: " + positionVector["x"].toPrecision(2); // X          Y
+              "Y [m]: " + positionVector["x"].toPrecision(2); // X          Y
             document.querySelector( "#posZ" ).innerHTML =
-              "Z: " + positionVector["y"].toPrecision(2); // Y          Z
+              "Z [m]: " + positionVector["y"].toPrecision(2); // Y          Z
           }
 
           // "Send Position" check box 
@@ -154,13 +162,16 @@
 
           // "Print Rotation" check box 
           if ( !document.querySelector( "#printRotationCheckBox" ).checked ) 
-          {
-            document
+          { // if it's  NOT checked
+
+          // Hide labels
+          document
               .querySelector( "#rotLabels" )
               .setAttribute( "style", "display:none" );
-          } else 
+          } 
+          else // it's checked
           {
-            // Build and send translation OSC message
+            // Show/update quaternion labels
             document
               .querySelector( "#rotLabels" )
               .setAttribute( "style", "display:block" );
@@ -172,20 +183,20 @@
               "Y: " + rotationQuaternion["_x"].toPrecision(2);  // X        Y
             document.querySelector( "#rotZ" ).innerHTML =
               "Z: " + rotationQuaternion["_y"].toPrecision(2);  // Y        Z
-
           }
 
           // "Send Rotation" check box 
           if ( document.querySelector( "#sendRotationCheckBox" ).checked )
-          {
-              // Build and send quaternion OSC message
-              const message = new OSC.Message(
-                document.getElementById('oscRotationAddressText').value,
-                rotationQuaternion["_w"], // MindAR     ISO2631
-                rotationQuaternion["_z"], // Z          X
-                rotationQuaternion["_x"], // X          Y
-                rotationQuaternion["_y"]  // Y          Z
-                );
+          { 
+            // if it's checked
+            // Build and send quaternion through OSC message
+            const message = new OSC.Message(
+              document.getElementById('oscRotationAddressText').value,
+              rotationQuaternion["_w"], // MindAR     ISO2631
+              rotationQuaternion["_z"], // Z          X
+              rotationQuaternion["_x"], // X          Y
+              rotationQuaternion["_y"]  // Y          Z
+            );
             osc.send( message );
           }
 
@@ -285,9 +296,9 @@
 
       <!-- Position labels -->
       <div id="posLabels">
-        <p id="posX">X:</p>
-        <p id="posY">Y:</p>
-        <p id="posZ">Z:</p>
+        <p id="posX">X [m]:</p>
+        <p id="posY">Y [m]:</p>
+        <p id="posZ">Z [m]:</p>
       </div>
       <br />
 
