@@ -30,7 +30,7 @@
       // osc.open({ port: document.querySelector("#oscDestinationPortText").value });  // Default = 8080 (uncommet this line to use custom port)
       osc.open();
 
-      // Init Mind AR
+      // Init Mind AR THREE
       const mindarThree = new MindARThree( {
         container: document.querySelector( "#container" ),
       } );
@@ -43,14 +43,15 @@
       const anchor = mindarThree.addAnchor(1);
 
       // Create sphere to be added on face achor point
-      const geometry = new THREE.SphereGeometry(0.1, 32, 16);
-      const material = new THREE.MeshBasicMaterial( 
+      const geometry = new THREE.SphereGeometry( 0.1, 32, 16 );
+      const material = new THREE.MeshBasicMaterial(
         {
-        color: 0x00ffff,
-        transparent: true,
-        opacity: 0.5,
-      } );
-      const sphere = new THREE.Mesh(geometry, material);
+          color: 0x00ffff,
+          transparent: true,
+          opacity: 0.5,
+        } 
+        );
+      const sphere = new THREE.Mesh( geometry, material );
       
       // Lock sphere on face ancor point nose
       anchor.group.add(sphere);
@@ -71,7 +72,7 @@
       // Add axes ref system on the sphere
       const positionVector = new THREE.Vector3();
       const axesHelper = new THREE.AxesHelper(1);
-      sphere.add(axesHelper);
+      sphere.add( axesHelper );
 
       // Get quaternion
       const rotationQuaternion = new THREE.Quaternion();
@@ -105,15 +106,16 @@
 
           // "Print Position" check box 
           if ( !document.querySelector( "#printPosCheckBox" ).checked ) 
-          { // if it's NOT checked
-
+          { 
+            // if it's NOT checked
             // Hide position labels
             document
               .querySelector( "#posLabels" )
               .setAttribute( "style", "display:none" );
           } 
-          else // if it's checked
+          else 
           {
+            // if it's checked
             // Show/update position labels
             document
               .querySelector( "#posLabels" )
@@ -129,6 +131,7 @@
           // "Send Position" check box 
           if ( document.querySelector( "#sendPositionCheckBox" ).checked )
           {
+            // if it's checked
             // Build and send position OSC message
             const message = new OSC.Message(
               document.getElementById('oscPositionAddressText').value,
@@ -162,15 +165,16 @@
 
           // "Print Rotation" check box 
           if ( !document.querySelector( "#printRotationCheckBox" ).checked ) 
-          { // if it's  NOT checked
-
-          // Hide labels
-          document
+          {
+            // if it's  NOT checked
+            // Hide labels
+            document
               .querySelector( "#rotLabels" )
               .setAttribute( "style", "display:none" );
           } 
-          else // it's checked
-          {
+          else 
+          { 
+            // if it's checked
             // Show/update quaternion labels
             document
               .querySelector( "#rotLabels" )
