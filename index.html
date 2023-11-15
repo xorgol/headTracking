@@ -89,20 +89,30 @@
           // Get sphere position
           positionVector.setFromMatrixPosition( sphere.modelViewMatrix );
 
-          // Unit conversion: from centimeters to meters
-          positionVector.x = positionVector.x / 100.0;
-          positionVector.y = positionVector.y / 100.0;
-          positionVector.z = positionVector.z / 100.0;
+          // Unit conversion: from centimeters to meters 
+          // Axis conversion 
+          let tmpX = positionVector.x;
+          let tmpY = positionVector.y;
+          let tmpZ = positionVector.z;
+          //                                MindAR     ISO2631
+          positionVector.x = tmpZ / 100.0;  // Z          X
+          positionVector.y = tmpX / 100.0;  // X          Y
+          positionVector.z = tmpY / 100.0;  // Y          Z
 
           // Get sphere rotation quaternion
           rotationQuaternion.setFromRotationMatrix( sphere.modelViewMatrix );
 
-          // Normalize quaternion
+          // Normalize quaternion + Axis conversion
           quaternionMagnitude = Math.sqrt( rotationQuaternion._w ** 2 + rotationQuaternion._x ** 2 + rotationQuaternion._y ** 2 + rotationQuaternion._z ** 2 );
-          rotationQuaternion._w = rotationQuaternion._w / quaternionMagnitude;
-          rotationQuaternion._x = rotationQuaternion._x / quaternionMagnitude;
-          rotationQuaternion._y = rotationQuaternion._y / quaternionMagnitude;
-          rotationQuaternion._z = rotationQuaternion._z / quaternionMagnitude;
+          rotationQuaternion._w = rotationQuaternion._w / quaternionMagnitude; 
+          tmpX = rotationQuaternion._x / quaternionMagnitude;
+          tmpY = rotationQuaternion._y / quaternionMagnitude;
+          tmpZ = rotationQuaternion._z / quaternionMagnitude;
+          //                            MindAR     ISO2631
+          rotationQuaternion._x = tmpZ;  // Z          X
+          rotationQuaternion._y = tmpX;  // X          Y
+          rotationQuaternion._z = tmpY;  // Y          Z
+
 
           // "Print Position" check box 
           if ( !document.querySelector( "#printPosCheckBox" ).checked ) 
@@ -121,11 +131,11 @@
               .querySelector( "#posLabels" )
               .setAttribute( "style", "display:block" );
             document.querySelector( "#posX" ).innerHTML = // MindAR     ISO2631
-              "X [m]: " + positionVector["z"].toPrecision(2); // Z          X
+              "X [m]: " + positionVector["x"].toPrecision(2); // Z          X
             document.querySelector( "#posY" ).innerHTML =
-              "Y [m]: " + positionVector["x"].toPrecision(2); // X          Y
+              "Y [m]: " + positionVector["y"].toPrecision(2); // X          Y
             document.querySelector( "#posZ" ).innerHTML =
-              "Z [m]: " + positionVector["y"].toPrecision(2); // Y          Z
+              "Z [m]: " + positionVector["z"].toPrecision(2); // Y          Z
           }
 
           // "Send Position" check box 
@@ -136,9 +146,9 @@
             const message = new OSC.Message(
               document.getElementById('oscPositionAddressText').value,
                                   // MindAR     ISO2631
-            positionVector["z"],  // Z          X
-            positionVector["x"],  // X          Y
-            positionVector["y"]   // Y          Z
+            positionVector["x"],  // Z          X
+            positionVector["y"],  // X          Y
+            positionVector["z"]   // Y          Z
             );
             osc.send(message);
           }
@@ -182,11 +192,11 @@
             document.querySelector( "#rotW" ).innerHTML =
               "W: " + rotationQuaternion["_w"].toPrecision(2);  // MindAR   ISO2631
             document.querySelector( "#rotX" ).innerHTML =       
-              "X: " + rotationQuaternion["_z"].toPrecision(2);  // Z        X
+              "X: " + rotationQuaternion["_x"].toPrecision(2);  // Z        X
             document.querySelector( "#rotY" ).innerHTML =
-              "Y: " + rotationQuaternion["_x"].toPrecision(2);  // X        Y
+              "Y: " + rotationQuaternion["_y"].toPrecision(2);  // X        Y
             document.querySelector( "#rotZ" ).innerHTML =
-              "Z: " + rotationQuaternion["_y"].toPrecision(2);  // Y        Z
+              "Z: " + rotationQuaternion["_z"].toPrecision(2);  // Y        Z
           }
 
           // "Send Rotation" check box 
@@ -197,9 +207,9 @@
             const message = new OSC.Message(
               document.getElementById('oscRotationAddressText').value,
               rotationQuaternion["_w"], // MindAR     ISO2631
-              rotationQuaternion["_z"], // Z          X
-              rotationQuaternion["_x"], // X          Y
-              rotationQuaternion["_y"]  // Y          Z
+              rotationQuaternion["_x"], // Z          X
+              rotationQuaternion["_y"], // X          Y
+              rotationQuaternion["_z"]  // Y          Z
             );
             osc.send( message );
           }
@@ -260,8 +270,8 @@
       <label for="printPosCheckBox">Print Position</label>
 
       <!-- Print Euler's Angles check box -->
-      <!--input type="checkbox" id="printEulerCheckBox" /-->
-      <!--label for="printEulerCheckBox">Print Rotation</label-->
+      <input type="checkbox" id="printEulerCheckBox" /-->
+      <label for="printEulerCheckBox">Print Euler's Angles</label-->
       <br /> <br / >
 
       <!-- Print rotation check box -->
