@@ -38,9 +38,9 @@
       // Get Mind AR objects
       const { renderer, scene, camera } = mindarThree;
 
-      // Create anchor point on face mesh: nose
+      // Create anchor point on face mesh: nose tip
       // https://github.com/tensorflow/tfjs-models/blob/master/face-landmarks-detection/mesh_map.jpg
-      const anchor = mindarThree.addAnchor(1);
+      const anchor = mindarThree.addAnchor(1); // 1: nose tip, 234: right ear, 454: left ear
 
       // Create sphere to be added on face achor point
       const geometry = new THREE.SphereGeometry( 0.1, 32, 16 );
@@ -73,6 +73,8 @@
 
       // Add axes ref system on the sphere
       const positionVector = new THREE.Vector3();
+      let origin = new THREE.Vector3();
+      origin.x = 0; origin.y = 0; origin.z = 0;
       const axesHelper = new THREE.AxesHelper(1);
       sphere.add( axesHelper );
 
@@ -91,15 +93,21 @@
           // Get sphere position
           positionVector.setFromMatrixPosition( sphere.modelViewMatrix );
 
-          // Unit conversion: from centimeters to meters 
-          // Axis conversion 
-          let tmpX = positionVector.x;
-          let tmpY = positionVector.y;
-          let tmpZ = positionVector.z;
-          //                                MindAR     ISO2631
-          positionVector.x = tmpZ / 100.0;  // Z          X
-          positionVector.y = tmpX / 100.0;  // X          Y
-          positionVector.z = tmpY / 100.0;  // Y          Z
+          // Change axis origin 
+          let tmpX = positionVector.x - origin.x;
+          let tmpY = positionVector.y - origin.y;
+          let tmpZ = positionVector.z - origin.z;
+
+          // Unit conversion: from centimeters to meters plus
+          // axis swap to match ISO2631 ref. system.  MindAR     ISO2631
+          positionVector.x = tmpZ / 100.0;  //          Z          X
+          positionVector.y = tmpX / 100.0;  //          X          Y
+          positionVector.z = tmpY / 100.0;  //          Y          Z
+
+          // Apply rescaling factor
+          positionVector.x = positionVector.x * document.getElementById('xRescalingFactorText').value;
+          positionVector.y = positionVector.y * document.getElementById('yRescalingFactorText').value;
+          positionVector.z = positionVector.z * document.getElementById('zRescalingFactorText').value;
 
           // Get sphere rotation quaternion
           rotationQuaternion.setFromRotationMatrix( sphere.modelViewMatrix );
@@ -133,11 +141,11 @@
               .querySelector( "#posLabels" )
               .setAttribute( "style", "display:block" );
             document.querySelector( "#posX" ).innerHTML = // MindAR     ISO2631
-              "X [m]: " + positionVector["x"].toPrecision(2); // Z          X
+              "X [m]: " + positionVector["x"].toPrecision(3); // Z          X
             document.querySelector( "#posY" ).innerHTML =
-              "Y [m]: " + positionVector["y"].toPrecision(2); // X          Y
+              "Y [m]: " + positionVector["y"].toPrecision(3); // X          Y
             document.querySelector( "#posZ" ).innerHTML =
-              "Z [m]: " + positionVector["z"].toPrecision(2); // Y          Z
+              "Z [m]: " + positionVector["z"].toPrecision(3); // Y          Z
           }
 
           // "Send Position" check box 
@@ -156,7 +164,7 @@
           }
 
 
-          // Quaternion and Euler's angles have cloclwise rotation system
+          // Quaternion and Euler's angles have clockwise rotation system
           if ( document.querySelector( "#printEulerCheckBox" ).checked ) 
           {
           var t0 = 2.0 * ( rotationQuaternion._w * rotationQuaternion._x + rotationQuaternion._y * rotationQuaternion._z );
@@ -254,6 +262,16 @@
         mindarThree.renderer.setAnimationLoop( null );
       } );
 
+      // Assign function to origin button: get current position and store as new origin point
+      originButton.addEventListener( "click", () => {
+        positionVector.setFromMatrixPosition( sphere.modelViewMatrix );
+        origin.x = positionVector.x;
+        origin.y = positionVector.y;
+        origin.z = positionVector.z;
+      } );
+
+      
+
     </script>
 
     <!-- <script type="module" src="/index.js"></script> -->
@@ -339,10 +357,17 @@
 
       <!-- Position labels -->
       <div id="posLabels">
-        <p id="posX">X [m]:</p>
-        <p id="posY">Y [m]:</p>
-        <p id="posZ">Z [m]:</p>
+        <label id="posX">X [m]:</label><br />
+        <label for="xRescalingFactorText">Rescaling</label>
+        <input type="text" id="xRescalingFactorText" size="5" value="1.0" /><br />
+        <label id="posY">Y [m]:</label><br />
+        <label for="yRescalingFactorText">Rescaling</label>
+        <input type="text" id="yRescalingFactorText" size="5" value="1.0" /><br />
+        <label id="posZ">Z [m]:</label><br />
+        <label for="zRescalingFactorText">Rescaling</label>
+        <input type="text" id="zRescalingFactorText" size="5" value="1.0" />
       </div>
+      <button id="originButton">Reset Axis Origin</button>
 
       <!-- Rotation labels -->
       <div id="eulerRotationLabels">
