@@ -38,11 +38,12 @@
       // Get Mind AR objects
       const { renderer, scene, camera } = mindarThree;
 
-      // Create anchor point on face mesh: nose tip
+      // Create anchor points on face mesh
       // https://github.com/tensorflow/tfjs-models/blob/master/face-landmarks-detection/mesh_map.jpg
-      const anchor = mindarThree.addAnchor(1); // 1: nose tip, 234: right ear, 454: left ear
+      const anchor1 = mindarThree.addAnchor(234); // 1: nose tip, 234: right ear, 454: left ear
+      const anchor2 = mindarThree.addAnchor(454); // 1: nose tip, 234: right ear, 454: left ear
 
-      // Create sphere to be added on face achor point
+      // Create sphere to be added on face achor points
       const geometry = new THREE.SphereGeometry( 0.1, 32, 16 );
       const material = new THREE.MeshBasicMaterial(
         {
@@ -51,10 +52,13 @@
           opacity: 0.5,
         } 
         );
-      const sphere = new THREE.Mesh( geometry, material );
+      const sphere1 = new THREE.Mesh( geometry, material );
+      const sphere2 = new THREE.Mesh( geometry, material );
       
-      // Lock sphere on face ancor point nose
-      anchor.group.add(sphere);
+      // Lock sphere on face ancor points
+      anchor1.group.add(sphere1);
+      anchor2.group.add(sphere2);
+
 
       // ------------------------------------------------------------
       // MindAR reference system vs. ISO2631 reference system
@@ -69,14 +73,17 @@
       //                  |    listener front |
       // ------------------------------------------------------------
       
-      // Quaternion and Euler's angles have cloclwise rotation system
+      // Quaternion and Euler's angles have clockwise rotation system
 
       // Add axes ref system on the sphere
       const positionVector = new THREE.Vector3();
+      const positionVector1 = new THREE.Vector3();
+      const positionVector2 = new THREE.Vector3();
+      
       let origin = new THREE.Vector3();
       origin.x = 0; origin.y = 0; origin.z = 0;
       const axesHelper = new THREE.AxesHelper(1);
-      sphere.add( axesHelper );
+      sphere2.add( axesHelper );
 
       // Get quaternion
       const rotationQuaternion = new THREE.Quaternion();
@@ -90,8 +97,14 @@
         {
           renderer.render( scene, camera );
 
-          // Get sphere position
-          positionVector.setFromMatrixPosition( sphere.modelViewMatrix );
+          // Get spheres positions
+          positionVector1.setFromMatrixPosition( sphere1.modelViewMatrix );
+          positionVector2.setFromMatrixPosition( sphere2.modelViewMatrix );
+          
+          // Compute head acoustic center
+          positionVector.x = ( positionVector1.x + positionVector2.x ) / 2;
+          positionVector.y = ( positionVector1.y + positionVector2.y ) / 2;
+          positionVector.z = ( positionVector1.z + positionVector2.z ) / 2;
 
           // Change axis origin 
           let tmpX = positionVector.x - origin.x;
@@ -110,7 +123,7 @@
           positionVector.z = positionVector.z * document.getElementById('zRescalingFactorText').value;
 
           // Get sphere rotation quaternion
-          rotationQuaternion.setFromRotationMatrix( sphere.modelViewMatrix );
+          rotationQuaternion.setFromRotationMatrix( sphere1.modelViewMatrix );
 
           // Normalize quaternion + Axis conversion
           quaternionMagnitude = Math.sqrt( rotationQuaternion._w ** 2 + rotationQuaternion._x ** 2 + rotationQuaternion._y ** 2 + rotationQuaternion._z ** 2 );
@@ -245,8 +258,8 @@
             osc.send( message );
           }
 
-          // console.log(rotationQuaternion.setFromRotationMatrix(sphere.modelViewMatrix));
-          // console.log(positionVector.setFromMatrixPosition(sphere.modelViewMatrix));
+          // console.log(rotationQuaternion.setFromRotationMatrix(sphere1.modelViewMatrix));
+          // console.log(positionVector.setFromMatrixPosition(sphere1.modelViewMatrix));
         });
       };
 
@@ -264,7 +277,14 @@
 
       // Assign function to origin button: get current position and store as new origin point
       originButton.addEventListener( "click", () => {
-        positionVector.setFromMatrixPosition( sphere.modelViewMatrix );
+        positionVector1.setFromMatrixPosition( sphere1.modelViewMatrix );
+        positionVector2.setFromMatrixPosition( sphere2.modelViewMatrix );
+
+         // Compute head acoustic center
+        positionVector.x = ( positionVector1.x + positionVector2.x ) / 2;
+        positionVector.y = ( positionVector1.y + positionVector2.y ) / 2;
+        positionVector.z = ( positionVector1.z + positionVector2.z ) / 2;
+
         origin.x = positionVector.x;
         origin.y = positionVector.y;
         origin.z = positionVector.z;
