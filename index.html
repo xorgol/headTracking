@@ -4,15 +4,17 @@
     <!-- Import libraries -->
     <script
       async
-      src="es-module-shims.js"
+      src="https://unpkg.com/es-module-shims@1.7.2/dist/es-module-shims.js"
     ></script>
+
     <script src="osc.min.js"></script>
+    
     <script type="importmap">
       {
         "imports": {
-          "three": "./three.module.js",
-          "three/addons/": "./three/examples/jsm/",
-          "mindar-face-three": "./mindar-face-three.prod.js"
+          "three": "https://unpkg.com/three@0.157.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.157.0/examples/jsm/",
+          "mindar-face-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-face-three.prod.js"
         }
       }
     </script>
@@ -172,6 +174,7 @@
             positionVector["z"]   // Y          Z
             );
             osc.send(message);
+            // console.log(message);
           }
 
 
@@ -325,51 +328,51 @@
       <br /><br />
       
       <!-- Print position check box -->
-      <input type="checkbox" id="printPosCheckBox" />
+      <input type="checkbox" checked="true" id="printPosCheckBox" />
       <label for="printPosCheckBox">Print Position</label>
       <br /> <br / >
 
       <!-- Print Euler's Angles check box -->
-      <input type="checkbox" id="printEulerCheckBox" /-->
+      <input type="checkbox" checked="true" id="printEulerCheckBox" /-->
       <label for="printEulerCheckBox">Print Euler's Angles</label-->
       <br /> <br / >
 
       <!-- Print rotation check box -->
-      <input type="checkbox" id="printQuaternionCheckBox" />
+      <input type="checkbox" checked="true" id="printQuaternionCheckBox" />
       <label for="printQuaternionCheckBox">Print Quaternion</label>
       <br /> <br />
 
       <!-- destination IP adress -->
-      <label for="oscDestinationIpText">Destination IP</label>
+      <!-- <label for="oscDestinationIpText">Destination IP</label>
       <br />
       <input type="text" id="oscDestinationIpText" size="15" value="127.0.0.1" />
-      <br />      
+      <br />       -->
 
-      <!-- destination port -->
+      <!-- destination port 
       <input type="text" id="oscDestinationPortText" size="4" value="9001" />
       <label for="oscDestinationPortText">Port</label>
-      <br /> <br />
+      <br /> <br /> -->
 
       <!-- translation OSC address -->
       <label for="oscPositionAddressText">Position OSC address</label>
       <br />
-      <input type="text" id="oscPositionAddressText" size="20" value="/position" />
+      <input type="text" id="oscPositionAddressText" size="20" value="/xyz" />
       <br /> <br />
       
       <!-- rotation OSC address -->
       <label for="oscRotationAddressText">Rotation OSC address</label>
       <br />
 
-      <input type="text" id="oscRotationAddressText" size="20" value="/rotation" />
+      <input type="text" id="oscRotationAddressText" size="20" value="/quat" />
       <br /> <br />      
 
       <!-- Send position check box -->
-      <input type="checkbox" id="sendPositionCheckBox" />
+      <input type="checkbox" checked="true" id="sendPositionCheckBox" />
       <label for="sendPositionCheckBox">Send Position</label>
       <br /> 
 
       <!-- Send rotation check box -->
-      <input type="checkbox" id="sendRotationCheckBox" />
+      <input type="checkbox" checked="true" id="sendRotationCheckBox" />
       <label for="sendRotationCheckBox">Send Rotation</label>
       <br /> <br />
 
