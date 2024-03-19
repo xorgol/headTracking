@@ -82,6 +82,10 @@
       
       let origin = new THREE.Vector3();
       origin.x = 0; origin.y = 0; origin.z = 0;
+      var yaw_z = 0; var pitch_y = 0; var roll_x = 0;
+      let originYaw = 0;
+      let originPitch = 0;
+      let originRoll = 0;
       const axesHelper = new THREE.AxesHelper(1);
       sphere2.add( axesHelper );
 
@@ -179,50 +183,72 @@
 
 
           // Quaternion and Euler's angles have clockwise rotation system
-          if ( document.querySelector( "#printEulerCheckBox" ).checked ) 
-          {
           var t0 = 2.0 * ( rotationQuaternion._w * rotationQuaternion._x + rotationQuaternion._y * rotationQuaternion._z );
           var t1 = 1.0 - 2.0 * ( rotationQuaternion._x * rotationQuaternion._x + rotationQuaternion._y * rotationQuaternion._y);
-          var roll_x = 180.0 / Math.PI * Math.atan2( t0, t1 );
+          roll_x = Math.atan2( t0, t1 );
       
           var t2 = 2.0 * ( rotationQuaternion._w * rotationQuaternion._y - rotationQuaternion._z * rotationQuaternion._x );
           if (t2 > +1.0)
           t2 = 1.0;
           if (t2 < -1.0)
           t2 = -1.0;
-          var pitch_y = 180.0 / Math.PI * Math.asin(t2);
+          pitch_y = Math.asin(t2);
       
           var t3 = 2.0 * ( rotationQuaternion._w * rotationQuaternion._z + rotationQuaternion._x * rotationQuaternion._y );
           var t4 = 1.0 - 2.0 * ( rotationQuaternion._y * rotationQuaternion._y + rotationQuaternion._z * rotationQuaternion._z );
-          var yaw_z = 180.0 / Math.PI * Math.atan2( t3, t4 );
-          }
+          yaw_z = Math.atan2( t3, t4 );
 
+          // Set initial YPR angles
+          let outYaw = yaw_z - originYaw;
+          let outPitch = pitch_y - originPitch;
+          let outRoll = roll_x - originRoll;
+
+          // Euler's Angles to Quaternion (from Scene Rotator source code, IEM suite 1.14.1)
+          let wa = Math.cos( outYaw / 2);
+          let za = Math.sin( outYaw / 2 );
+          let wb = Math.cos( outPitch / 2);
+          let yb = Math.sin( outPitch / 2 );
+          let wc = Math.cos( outRoll / 2 );
+          let xc = Math.sin( outRoll / 2 );
+          
+          // yaw -> pitch -> roll (extrinsic rotations)
+          // let qw = wc * wb * wa - xc * yb * za;
+          // let qx = wc * yb * za + xc * wb * wa;
+          // let qy = wc * yb * wa - xc * wb * za;
+          // let qz = wc * wb * za + xc * yb * wa;
+          
+          // roll -> pitch -> yaw (extrinsic rotations)
+          rotationQuaternion._w = wa * wc * wb + za * xc * yb;
+          rotationQuaternion._x = wa * xc * wb - za * wc * yb;
+          rotationQuaternion._y = wa * wc * yb + za * xc * wb;
+          rotationQuaternion._z = za * wc * wb - wa * xc * yb;
 
           // "Print Euler Angles" check box 
           if ( !document.querySelector( "#printEulerCheckBox" ).checked ) 
           {
+          // if it's  NOT checked, hide labels
            document
              .querySelector( "#eulerRotationLabels" )
              .setAttribute( "style", "display:none" );
           } else 
           {
-            // Build and send translation OSC message
+            // if it's checked
+            // Print yaw, pitch, roll labels and values
             document
              .querySelector( "#eulerRotationLabels" )
              .setAttribute( "style", "display:block" );
             document.querySelector( "#rotYaw" ).innerHTML =
-             "Yaw: " + yaw_z.toPrecision(2);  
+             "Yaw  [°]: " + (180.0 / Math.PI * outYaw).toPrecision(2);  
             document.querySelector( "#rotPitch" ).innerHTML =       
-             "Pitch: " + pitch_y.toPrecision(2);  
+             "Pitch[°]: " + (180.0 / Math.PI * outPitch).toPrecision(2);  
             document.querySelector( "#rotRoll" ).innerHTML =
-             "Roll: " + roll_x.toPrecision(2);  
+             "Roll [°]: " + (180.0 / Math.PI * outRoll).toPrecision(2);  
           }
 
           // "Print quaternion" check box 
           if ( !document.querySelector( "#printQuaternionCheckBox" ).checked ) 
           {
-            // if it's  NOT checked
-            // Hide labels
+            // if it's  NOT checked, hide labels
             document
               .querySelector( "#rotLabels" )
               .setAttribute( "style", "display:none" );
@@ -230,7 +256,7 @@
           else 
           { 
             // if it's checked
-            // Show/update quaternion labels
+            // Print quaternion labels and values
             document
               .querySelector( "#rotLabels" )
               .setAttribute( "style", "display:block" );
@@ -289,6 +315,10 @@
         origin.x = positionVector.x;
         origin.y = positionVector.y;
         origin.z = positionVector.z;
+
+        originYaw   = yaw_z;
+        originPitch = pitch_y;
+        originRoll  = roll_x;
       } );
 
       
@@ -392,9 +422,9 @@
 
       <!-- Rotation labels -->
       <div id="eulerRotationLabels">
-        <p id="rotYaw">Yaw:</p>
-        <p id="rotPitch">Pitch:</p>
-        <p id="rotRoll">Roll:</p>
+        <p id=  "rotYaw">Yaw  [°]:</p>
+        <p id="rotPitch">Pitch[°]:</p>
+        <p id ="rotRoll">Roll [°]:</p>
       </div>
 
       <!-- Rotation labels -->
